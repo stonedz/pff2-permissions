@@ -1,0 +1,21 @@
+{
+	"name": "stonedz/pff2-permissions",
+	"type": "pff2-module",
+	"description": "Manages permissions in pff2 controllers",
+	"license": "MIT",
+	"keywords": [
+		"pff2", "module", "images"
+	],
+	"authors": [
+		{
+			"name": "Paolo Fagni",
+			"email": "paolo.fagni@gmail.com",
+			"role": "Developer"
+		}
+	],
+	"homepage": "https://github.com/stonedz/pff2-permissions",
+	"require": {
+		"stonedz/pff2-installers": "*",
+        "crodas/notoj": "*"
+	}
+}

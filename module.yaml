@@ -1,0 +1,4 @@
+name: Permission
+version: "0.1"
+desc: Manages permissions
+class: PermissionChecker
