@@ -4,7 +4,7 @@
 	"description": "Manages permissions in pff2 controllers",
 	"license": "MIT",
 	"keywords": [
-		"pff2", "module", "images"
+		"pff2", "module", "permissions"
 	],
 	"authors": [
 		{
@@ -15,7 +15,8 @@
 	],
 	"homepage": "https://github.com/stonedz/pff2-permissions",
 	"require": {
+		"stonedz/pff2": "*",
 		"stonedz/pff2-installers": "*",
-        "crodas/notoj": "*"
+        	"crodas/notoj": "*"
 	}
 }
