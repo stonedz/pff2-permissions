@@ -16,6 +16,6 @@
 	"homepage": "https://github.com/stonedz/pff2-permissions",
 	"require": {
 		"stonedz/pff2-installers": "*",
-        	"crodas/notoj": "*"
+        "zeptech/annotations": "1.1.0"
 	}
 }

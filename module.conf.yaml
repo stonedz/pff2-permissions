@@ -1,2 +1,9 @@
 moduleConf:
-  #Permission configuration
+  # USer class name
+  userClass: User
+
+  # Session key to get Id of the currently logged user
+  sessionUserId: logged_user_id
+
+  # Method on the user instance to get the Permission instace (POPO)
+  getPermission: getPermission
