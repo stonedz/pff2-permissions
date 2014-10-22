@@ -1,0 +1,15 @@
+moduleConf:
+  # USer class name
+  userClass: AnagraficaBusiness
+
+  # Session key to get Id of the currently logged user
+  sessionUserId: id_user
+
+  # Method on the user instance to get the Permission instace (POPO)
+  getPermission: getPermesso
+
+  # Controller to redirect if not logged
+  controllerNotLogged: Index
+
+  # Action to redirect if not logged
+  actionNotLogged: index
