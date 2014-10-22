@@ -11,7 +11,7 @@ use zpt\anno\Annotations;
  */
 class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBeforeHook{
 
-    private $userClass, $sessionUserId, $getPermission;
+    private $userClass, $sessionUserId, $getPermission, $controllerNotLogged, $actionNotLogged;
 
     public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml'){
         $this->loadConfig($confFile);
@@ -22,25 +22,40 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
      */
     public function loadConfig($confFile) {
         $conf = $this->readConfig($confFile);
-        $this->userClass = $conf['moduleConf']['userClass'];
-        $this->sessionUserId = $conf['moduleConf']['sessionUserId'];
-        $this->getPermission = $conf['moduleConf']['getPermission'];
+
+        $this->userClass           = $conf['moduleConf']['userClass'];
+        $this->sessionUserId       = $conf['moduleConf']['sessionUserId'];
+        $this->getPermission       = $conf['moduleConf']['getPermission'];
+        $this->controllerNotLogged = $conf['moduleConf']['controllerNotLogged'];
+        $this->actionNotLogged     = $conf['moduleConf']['actionNotLogged'];
     }
 
+    /**
+     * @return bool
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     * @throws pffexception
+     */
     public function doBefore() {
-        $controller  = $this->getController();
-        $annotations = $this->getAnnotations($controller);
-        if(!isset($annotations['PffPermissions']) || count($annotations)<1) {
+        $controller        = $this->getController();
+        $classReflection    = new \ReflectionClass(get_class($controller));
+        $class_annotations = $this->getClassAnnotations($classReflection, $controller);
+        $annotations       = $this->getAnnotations($classReflection, $controller);
+
+        if((!isset($annotations['Pff2Permissions']) && !isset($class_annotations['Pff2Permissions'])) || count($annotations)<1) {
             return true;
         }
-        $annotations = $annotations['PffPermissions'];
+        $annotations = array_merge($annotations['Pff2Permissions'],$class_annotations['Pff2Permissions']);
+        $annotations = array_unique($annotations);
 
         if(isset($_SESSION['logged_data'][$this->sessionUserId])) {
             $user = $this->_controller->_em->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
             $perm = call_user_func(array($user, $this->getPermission));
         }
         else {
-            throw new PffException('No user in session', 500);
+            header("Location : ".$this->_app->getExternalPath().$this->controllerNotLogged.'/'.$this->actionNotLogged);
+            return false;
         }
 
         foreach($annotations as $a) {
@@ -57,9 +72,17 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
      * @param \pff\AController $controller
      * @return \zpt\anno\Annotations
      */
-    private function getAnnotations(\pff\AController $controller) {
-        $classRefletion = new \ReflectionClass(get_class($controller));
-        $actions = $classRefletion->getMethod($controller->getAction());
+    private function getAnnotations(\ReflectionClass $classReflection, \pff\AController $controller) {
+        $actions = $classReflection->getMethod($controller->getAction());
         return new Annotations($actions);
+    }
+
+    /**
+     * @param \ReflectionClass $classReflection
+     * @param \pff\AController $controller
+     * @return \zpt\anno\Annotations
+     */
+    private function getClassAnnotations(\ReflectionClass $classReflection, \pff\AController $controller) {
+        return new Annotations($classReflection);
     }
 }

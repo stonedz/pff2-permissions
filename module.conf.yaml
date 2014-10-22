@@ -7,3 +7,9 @@ moduleConf:
 
   # Method on the user instance to get the Permission instace (POPO)
   getPermission: getPermission
+
+  # Controller to redirect if not logged
+  controllerNotLogged: Index
+
+  # Action to redirect if not logged
+  actionNotLogged: index
