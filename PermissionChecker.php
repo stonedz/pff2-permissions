@@ -46,16 +46,27 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
         if((!isset($annotations['Pff2Permissions']) && !isset($class_annotations['Pff2Permissions'])) || count($annotations)<1) {
             return true;
         }
-        $annotations = array_merge($annotations['Pff2Permissions'],$class_annotations['Pff2Permissions']);
-        $annotations = array_unique($annotations);
+
+        if(isset($annotations['Pff2Permissions']) && !isset($class_annotations['Pff2Permissions'])) {
+            $annotations = $annotations['Pff2Permissions'];
+        }
+        else if (!isset($annotations['Pff2Permissions']) && isset($class_annotations['Pff2Permissions'])) {
+            $annotations = $class_annotations['Pff2Permissions'];
+        }
+        else {
+            $annotations = array_merge($annotations['Pff2Permissions'], $class_annotations['Pff2Permissions']);
+            $annotations = array_unique($annotations);
+        }
 
         if(isset($_SESSION['logged_data'][$this->sessionUserId])) {
             $user = $this->_controller->_em->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
             $perm = call_user_func(array($user, $this->getPermission));
         }
         else {
-            header("Location : ".$this->_app->getExternalPath().$this->controllerNotLogged.'/'.$this->actionNotLogged);
-            return false;
+            //$this->_controller->resetViews();
+            header("Location : ".$this->_app->getExternalPath().$this->controllerNotLogged."/".$this->actionNotLogged);
+            //header("Location : http://www.google.it");
+            exit();
         }
 
         foreach($annotations as $a) {
