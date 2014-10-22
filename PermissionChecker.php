@@ -64,7 +64,7 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
         }
         else {
             //$this->_controller->resetViews();
-            header("Location : ".$this->_app->getExternalPath().$this->controllerNotLogged."/".$this->actionNotLogged);
+            header("Location: ".$this->_app->getExternalPath().$this->controllerNotLogged."/".$this->actionNotLogged);
             //header("Location : http://www.google.it");
             exit();
         }
