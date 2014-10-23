@@ -11,10 +11,26 @@ use zpt\anno\Annotations;
  */
 class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBeforeHook{
 
-    private $userClass, $sessionUserId, $getPermission, $controllerNotLogged, $actionNotLogged;
+    private $userClass,
+        $sessionUserId,
+        $getPermission,
+        $controllerNotLogged,
+        $actionNotLogged,
+        $permissionClass;
+
+    /**
+     * @var \ReflectionClass
+     */
+    private $classReflection;
+
+    /**
+     * @var \pff\AController
+     */
+    private $controller;
 
     public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml'){
         $this->loadConfig($confFile);
+
     }
 
     /**
@@ -28,6 +44,7 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
         $this->getPermission       = $conf['moduleConf']['getPermission'];
         $this->controllerNotLogged = $conf['moduleConf']['controllerNotLogged'];
         $this->actionNotLogged     = $conf['moduleConf']['actionNotLogged'];
+        $this->permissionClass     = $conf['moduleConf']['permissionClass'];
     }
 
     /**
@@ -38,10 +55,10 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
      * @throws pffexception
      */
     public function doBefore() {
-        $controller        = $this->getController();
-        $classReflection    = new \ReflectionClass(get_class($controller));
-        $class_annotations = $this->getClassAnnotations($classReflection, $controller);
-        $annotations       = $this->getAnnotations($classReflection, $controller);
+        $this->controller        = $this->getController();
+        $this->classReflection   = new \ReflectionClass(get_class($this->controller));
+        $class_annotations = $this->getClassAnnotations($this->classReflection, $this->controller);
+        $annotations       = $this->getAnnotations($this->classReflection, $this->controller);
 
         if((!isset($annotations['Pff2Permissions']) && !isset($class_annotations['Pff2Permissions'])) || count($annotations)<1) {
             return true;
@@ -63,9 +80,7 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
             $perm = call_user_func(array($user, $this->getPermission));
         }
         else {
-            //$this->_controller->resetViews();
             header("Location: ".$this->_app->getExternalPath().$this->controllerNotLogged."/".$this->actionNotLogged);
-            //header("Location : http://www.google.it");
             exit();
         }
 
@@ -75,6 +90,22 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
             }
         }
         return true;
+    }
+
+    /**
+     *
+     */
+    public function getPrettyPermissions() {
+        $permissionReflect = new \ReflectionClass('\\pff\models\\'.$this->permissionClass);
+        $prop = $permissionReflect->getProperties();
+        $toReturnAnnotations = array();
+        foreach($prop as $a) {
+            $i = new Annotations($a);
+            if(isset($i['pff2permissiondescription'])) {
+                $toReturnAnnotations[$a->name] = $i['pff2permissiondescription'];
+            }
+        }
+        return $toReturnAnnotations;
     }
 
     /**

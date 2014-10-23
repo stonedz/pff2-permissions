@@ -13,3 +13,6 @@ moduleConf:
 
   # Action to redirect if not logged
   actionNotLogged: index
+
+  # NAme of the class used as Permission
+  permissionClass: Permesso
