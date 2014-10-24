@@ -122,12 +122,17 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
             $i = $this->reader->getPropertyAnnotations('\\pff\models\\'.$this->permissionClass, $a->name);
             $arr = $i->toArray();
             if(isset($arr['Pff2PermissionDescription'])){
-                $toReturnAnnotations[$a->name] = $arr['Pff2PermissionDescription'];
+                $tmp_name = explode('_', $a->name);
+                array_walk($tmp_name, array($this,'capitalize'));
+                $toReturnAnnotations[implode($tmp_name)] = $arr['Pff2PermissionDescription'];
             }
         }
         return $toReturnAnnotations;
     }
 
+    private function capitalize(&$arr, $k) {
+        $arr = ucfirst($arr);
+    }
     /**
      * Get annotations for the currently active action
      *
