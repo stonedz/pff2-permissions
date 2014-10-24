@@ -16,6 +16,6 @@
 	"homepage": "https://github.com/stonedz/pff2-permissions",
 	"require": {
 		"stonedz/pff2-installers": "*",
-        "zeptech/annotations": "1.1.0"
+        "minime/annotations": "2.1.0"
 	}
 }

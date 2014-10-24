@@ -5,6 +5,9 @@ use pff\IBeforeHook;
 use pff\IConfigurableModule;
 use pff\pffexception;
 use zpt\anno\Annotations;
+use Minime\Annotations\Reader;
+use Minime\Annotations\Parser;
+use Minime\Annotations\Cache\FileCache;
 
 /**
  * Manages Controller->action permissions
@@ -28,9 +31,14 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
      */
     private $controller;
 
+    /**
+     * @var Reader
+     */
+    private $reader;
+
     public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml'){
         $this->loadConfig($confFile);
-
+        $this->reader = new Reader(new Parser(), new FileCache(ROOT.DS.'app'.DS.'tmp'.DS));
     }
 
     /**
@@ -55,23 +63,31 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
      * @throws pffexception
      */
     public function doBefore() {
-        $this->controller        = $this->getController();
-        $this->classReflection   = new \ReflectionClass(get_class($this->controller));
-        $class_annotations = $this->getClassAnnotations($this->classReflection, $this->controller);
-        $annotations       = $this->getAnnotations($this->classReflection, $this->controller);
+//        $this->controller        = $this->getController();
+//        $this->classReflection   = new \ReflectionClass(get_class($this->controller));
+//        $class_annotations = $this->getClassAnnotations($this->classReflection, $this->controller);
+//        $annotations       = $this->getAnnotations($this->classReflection, $this->controller);
 
-        if((!isset($annotations['Pff2Permissions']) && !isset($class_annotations['Pff2Permissions'])) || count($annotations)<1) {
+        $class_name        = get_class($this->_controller);
+        $class_annotations = $this->reader->getClassAnnotations($class_name);
+        $annotations       = $this->reader->getMethodAnnotations($class_name, $this->_controller->getAction());
+
+        $method_permissions = $annotations->get('Pff2Permissions');
+        $class_permissions  = $class_annotations->get('Pff2Permissions');
+
+        //There's no permissions, let the user in
+        if((!$method_permissions && !$class_permissions)) {
             return true;
         }
 
-        if(isset($annotations['Pff2Permissions']) && !isset($class_annotations['Pff2Permissions'])) {
-            $annotations = $annotations['Pff2Permissions'];
+        if($method_permissions && !$class_permissions) {
+            $annotations = $method_permissions;
         }
-        else if (!isset($annotations['Pff2Permissions']) && isset($class_annotations['Pff2Permissions'])) {
-            $annotations = $class_annotations['Pff2Permissions'];
+        else if (!$method_permissions && $class_permissions) {
+            $annotations = $class_permissions;
         }
         else {
-            $annotations = array_merge($annotations['Pff2Permissions'], $class_annotations['Pff2Permissions']);
+            $annotations = array_merge($method_permissions, $class_permissions);
             $annotations = array_unique($annotations);
         }
 
@@ -93,16 +109,20 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
     }
 
     /**
+     * Returns the description of the Permission's class properties
+     * in the format array[property_name] = [@Pff2PermissionDescription]
      *
+     * @return array
      */
     public function getPrettyPermissions() {
         $permissionReflect = new \ReflectionClass('\\pff\models\\'.$this->permissionClass);
         $prop = $permissionReflect->getProperties();
         $toReturnAnnotations = array();
         foreach($prop as $a) {
-            $i = new Annotations($a);
-            if(isset($i['pff2permissiondescription'])) {
-                $toReturnAnnotations[$a->name] = $i['pff2permissiondescription'];
+            $i = $this->reader->getPropertyAnnotations('\\pff\models\\'.$this->permissionClass, $a->name);
+            $arr = $i->toArray();
+            if(isset($arr['Pff2PermissionDescription'])){
+                $toReturnAnnotations[$a->name] = $arr['Pff2PermissionDescription'];
             }
         }
         return $toReturnAnnotations;
