@@ -117,33 +117,10 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
             $arr = $i->toArray();
             if(isset($arr['Pff2PermissionDescription'])){
                 $tmp_name = explode('_', $a->name);
-                array_walk($tmp_name, array($this,'capitalize'));
+                array_walk($tmp_name, function(&$arr,$k){$arr = ucfirst($arr);});
                 $toReturnAnnotations[implode($tmp_name)] = $arr['Pff2PermissionDescription'];
             }
         }
         return $toReturnAnnotations;
-    }
-
-    private function capitalize(&$arr, $k) {
-        $arr = ucfirst($arr);
-    }
-    /**
-     * Get annotations for the currently active action
-     *
-     * @param \pff\AController $controller
-     * @return \zpt\anno\Annotations
-     */
-    private function getAnnotations(\ReflectionClass $classReflection, \pff\AController $controller) {
-        $actions = $classReflection->getMethod($controller->getAction());
-        return new Annotations($actions);
-    }
-
-    /**
-     * @param \ReflectionClass $classReflection
-     * @param \pff\AController $controller
-     * @return \zpt\anno\Annotations
-     */
-    private function getClassAnnotations(\ReflectionClass $classReflection, \pff\AController $controller) {
-        return new Annotations($classReflection);
     }
 }
