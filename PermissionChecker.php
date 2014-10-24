@@ -4,7 +4,6 @@ namespace pff\modules;
 use pff\IBeforeHook;
 use pff\IConfigurableModule;
 use pff\pffexception;
-use zpt\anno\Annotations;
 use Minime\Annotations\Reader;
 use Minime\Annotations\Parser;
 use Minime\Annotations\Cache\FileCache;
@@ -63,11 +62,6 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
      * @throws pffexception
      */
     public function doBefore() {
-//        $this->controller        = $this->getController();
-//        $this->classReflection   = new \ReflectionClass(get_class($this->controller));
-//        $class_annotations = $this->getClassAnnotations($this->classReflection, $this->controller);
-//        $annotations       = $this->getAnnotations($this->classReflection, $this->controller);
-
         $class_name        = get_class($this->_controller);
         $class_annotations = $this->reader->getClassAnnotations($class_name);
         $annotations       = $this->reader->getMethodAnnotations($class_name, $this->_controller->getAction());
