@@ -14,12 +14,12 @@
 		}
 	],
 	"homepage": "https://github.com/stonedz/pff2-permissions",
-	"require": {
-		"stonedz/pff2-installers": "*",
-        "minime/annotations": "dev-master"
-	},
     "repositories": [ {
         "type": "vcs",
         "url": "https://github.com/stonedz/annotations"
-    }]
+    }],
+	"require": {
+		"stonedz/pff2-installers": "*",
+        "minime/annotations": "dev-apc"
+	}
 }
