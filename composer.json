@@ -18,8 +18,8 @@
 		"stonedz/pff2-installers": "*",
         "minime/annotations": "dev-master"
 	},
-    "repositories": [
+    "repositories": [ {
         "type": "vcs",
         "url": "https://github.com/stonedz/annotations"
-    ]
+    }]
 }
