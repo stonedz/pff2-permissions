@@ -16,7 +16,7 @@
 	"homepage": "https://github.com/stonedz/pff2-permissions",
 	"require": {
 		"stonedz/pff2-installers": "*",
-        "minime/annotations": "dev.master"
+        "minime/annotations": "dev-master"
 	},
     "repositories": [
         "type": "vcs",
