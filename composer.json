@@ -14,12 +14,8 @@
 		}
 	],
 	"homepage": "https://github.com/stonedz/pff2-permissions",
-    "repositories": [ {
-        "type": "vcs",
-        "url": "https://github.com/stonedz/annotations"
-    }],
 	"require": {
 		"stonedz/pff2-installers": "*",
-        "minime/annotations": "dev-apc as 2.1.0"
+        "minime/annotations": "dev-master"
 	}
 }
