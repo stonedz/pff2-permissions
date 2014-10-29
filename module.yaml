@@ -4,3 +4,5 @@ desc: Manages permissions
 class: PermissionChecker
 requires:
   - exception_handler
+requires_php_extension:
+  - apc

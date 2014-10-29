@@ -3,6 +3,7 @@
 	"type": "pff2-module",
 	"description": "Manages permissions in pff2 controllers",
 	"license": "MIT",
+    "minimum-stability": "dev",
 	"keywords": [
 		"pff2", "module", "permissions"
 	],

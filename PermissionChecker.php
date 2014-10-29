@@ -1,12 +1,12 @@
 <?php
 
 namespace pff\modules;
+use Minime\Annotations\Cache\ApcCache;
 use pff\IBeforeHook;
 use pff\IConfigurableModule;
 use pff\pffexception;
 use Minime\Annotations\Reader;
 use Minime\Annotations\Parser;
-use Minime\Annotations\Cache\FileCache;
 
 /**
  * Manages Controller->action permissions
@@ -37,7 +37,7 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
 
     public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml'){
         $this->loadConfig($confFile);
-        $this->reader = new Reader(new Parser(), new FileCache(ROOT.DS.'app'.DS.'tmp'.DS));
+        $this->reader = new Reader(new Parser(), new ApcCache());
     }
 
     /**
