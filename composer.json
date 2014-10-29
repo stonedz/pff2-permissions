@@ -18,5 +18,10 @@
 	"require": {
 		"stonedz/pff2-installers": "*",
         "minime/annotations": "dev-master"
-	}
+	},
+    "autoload": {
+        "psr-4": {
+            "pff\\modules\\": "src/"
+        }
+    }
 }

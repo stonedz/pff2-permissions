@@ -1,3 +1,6 @@
 .idea
 *.iml
 module.conf.local.yaml
+vendor
+composer.lock
+composer.phar
