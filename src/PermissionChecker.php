@@ -2,16 +2,18 @@
 
 namespace pff\modules;
 use Minime\Annotations\Cache\ApcCache;
-use pff\IBeforeHook;
-use pff\IConfigurableModule;
-use pff\pffexception;
+use pff\Abs\AController;
+use pff\Abs\AModule;
+use pff\Iface\IBeforeHook;
+use pff\Iface\IConfigurableModule;
+use pff\Exception\PffException;
 use Minime\Annotations\Reader;
 use Minime\Annotations\Parser;
 
 /**
  * Manages Controller->action permissions
  */
-class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBeforeHook{
+class PermissionChecker extends AModule implements IConfigurableModule, IBeforeHook{
 
     private $userClass,
         $sessionUserId,
@@ -26,7 +28,7 @@ class PermissionChecker extends \pff\AModule implements IConfigurableModule, IBe
     private $classReflection;
 
     /**
-     * @var \pff\AController
+     * @var AController
      */
     private $controller;
 
