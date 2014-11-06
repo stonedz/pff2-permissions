@@ -39,7 +39,7 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
 
     public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml'){
         $this->loadConfig($confFile);
-        $this->reader = new Reader(new Parser(), new ApcCache());
+        //$this->reader = new Reader(new Parser(), new ApcCache());
     }
 
     /**
@@ -61,15 +61,13 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
-     * @throws pffexception
+     * @throws PffException
      */
     public function doBefore() {
-        $class_name        = get_class($this->_controller);
-        $class_annotations = $this->reader->getClassAnnotations($class_name);
-        $annotations       = $this->reader->getMethodAnnotations($class_name, $this->_controller->getAction());
-
-        $method_permissions = $annotations->get('Pff2Permissions');
-        $class_permissions  = $class_annotations->get('Pff2Permissions');
+        /** @var Pff2Annotations $annotationReader */
+        $annotationReader = $this->_controller->loadModule('pff2-annotations');
+        $class_permissions = $annotationReader->getClassAnnotation('Pff2Permissions');
+        $method_permissions =$annotationReader->getMethodAnnotation('Pff2Permissions');
 
         //There's no permissions, let the user in
         if((!$method_permissions && !$class_permissions)) {

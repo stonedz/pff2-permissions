@@ -3,6 +3,7 @@ version: "0.1"
 desc: Manages permissions
 class: PermissionChecker
 requires:
+  - pff2-annotations
   - exception_handler
 requires_php_extension:
   - apc

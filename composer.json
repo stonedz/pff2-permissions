@@ -17,7 +17,8 @@
 	"homepage": "https://github.com/stonedz/pff2-permissions",
 	"require": {
 		"stonedz/pff2-installers": "*",
-        "minime/annotations": "dev-master"
+        "stonedz/pff2-annotations: "1.*"
+
 	},
     "autoload": {
         "psr-4": {
