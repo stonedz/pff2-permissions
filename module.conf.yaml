@@ -16,3 +16,6 @@ moduleConf:
 
   # NAme of the class used as Permission
   permissionClass: Permesso
+
+  # Choose db type possible values are (odm for doctrine odb and orm for doctrine orm)
+  dbType: orm

@@ -1,9 +1,11 @@
 <?php
 
 namespace pff\modules;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Minime\Annotations\Cache\ApcCache;
 use pff\Abs\AController;
 use pff\Abs\AModule;
+use pff\Core\ModuleManager;
 use pff\Iface\IBeforeHook;
 use pff\Iface\IConfigurableModule;
 use pff\Exception\PffException;
@@ -20,7 +22,8 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
         $getPermission,
         $controllerNotLogged,
         $actionNotLogged,
-        $permissionClass;
+        $permissionClass,
+        $dbType;
 
     /**
      * @var \ReflectionClass
@@ -54,6 +57,7 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
         $this->controllerNotLogged = $conf['moduleConf']['controllerNotLogged'];
         $this->actionNotLogged     = $conf['moduleConf']['actionNotLogged'];
         $this->permissionClass     = $conf['moduleConf']['permissionClass'];
+        $this->dbType              = $conf['moduleConf']['dbType'];
     }
 
     /**
@@ -64,10 +68,10 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
      * @throws PffException
      */
     public function doBefore() {
-        /** @var Pff2Annotations $annotationReader */
-        $annotationReader = $this->_controller->loadModule('pff2-annotations');
-        $class_permissions = $annotationReader->getClassAnnotation('Pff2Permissions');
-        $method_permissions =$annotationReader->getMethodAnnotation('Pff2Permissions');
+        $annotationReader = ModuleManager::loadModule('pff2-annotations');
+
+        $class_permissions  = $annotationReader->getClassAnnotation('Pff2Permissions');
+        $method_permissions = $annotationReader->getMethodAnnotation('Pff2Permissions');
 
         //There's no permissions, let the user in
         if((!$method_permissions && !$class_permissions)) {
@@ -86,7 +90,11 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
         }
 
         if(isset($_SESSION['logged_data'][$this->sessionUserId])) {
-            $user = $this->_controller->_em->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
+            if($this->dbType == 'odm') {
+                $user = $this->_controller->_dm->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
+            }else {
+                $user = $this->_controller->_em->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
+            }
             $perm = call_user_func(array($user, $this->getPermission));
         }
         else {
@@ -96,7 +104,7 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
 
         foreach($annotations as $a) {
             if(!call_user_func(array($perm, 'get'.$a))) {
-                throw new PffException('Action not permitted', 500);
+                throw new PffException('Action not permitted', 403);
             }
         }
         return true;
