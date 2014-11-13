@@ -96,6 +96,9 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
                 $user = $this->_controller->_em->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
             }
             $perm = call_user_func(array($user, $this->getPermission));
+            if(!$perm) {
+                throw new PffException('Action not permitted', 403);
+            }
         }
         else {
             header("Location: ".$this->_app->getExternalPath().$this->controllerNotLogged."/".$this->actionNotLogged);
