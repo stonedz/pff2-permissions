@@ -42,7 +42,7 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
 
     public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml'){
         $this->loadConfig($confFile);
-        //$this->reader = new Reader(new Parser(), new ApcCache());
+        $this->reader = new Reader(new Parser(), new ApcCache());
     }
 
     /**
