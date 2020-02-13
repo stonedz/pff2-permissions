@@ -68,10 +68,19 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
      * @throws PffException
      */
     public function doBefore() {
+	$logical_operator = 'and';
         $annotationReader = ModuleManager::loadModule('pff2-annotations');
 
         $class_permissions  = $annotationReader->getClassAnnotation('Pff2Permissions');
         $method_permissions = $annotationReader->getMethodAnnotation('Pff2Permissions');
+	$logical_operator_tmp = $annotationReader->getMethodAnnotation('Pff2PermissionsLogicalOperator');
+	
+	if($logical_operator_tmp == 'and' || $logical_operator_tmp == 'AND'){
+	    $logical_operator = 'and';
+	}
+	elseif($logical_operator_tmp == 'or' || $logical_operator_tmp == 'OR'){
+	    $logical_operator = 'or';
+	}
 
         //There's no permissions, let the user in
         if((!$method_permissions && !$class_permissions)) {
@@ -105,11 +114,22 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
             exit();
         }
 
-        foreach($annotations as $a) {
-            if(!call_user_func(array($perm, 'get'.$a))) {
-                throw new PffException('Action not permitted', 403);
+	
+	if($logical_operator == 'and'){
+            foreach($annotations as $a) {
+                if(!call_user_func(array($perm, 'get'.$a))) {
+                    throw new PffException('Action not permitted', 403);
+                }
             }
-        }
+	}
+	elseif($logical_operator == 'or'){
+            foreach($annotations as $a) {
+                if(call_user_func(array($perm, 'get'.$a))) {
+                    return true;
+                }
+            }
+            throw new PffException('Action not permitted', 403);
+	}
         return true;
     }
 
