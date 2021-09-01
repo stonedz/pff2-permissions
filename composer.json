@@ -17,9 +17,11 @@
 	"homepage": "https://github.com/stonedz/pff2-permissions",
 	"require": {
 		"stonedz/pff2-installers": "*",
-        "stonedz/pff2-annotations": "2.*"
-
+        "stonedz/pff2-annotations": "3.0.x-dev"
 	},
+    "require-dev": {
+        "stonedz/pff2": "3.0.x-dev"
+    },
     "autoload": {
         "psr-4": {
             "pff\\modules\\": "src/"

@@ -1,6 +1,9 @@
-.idea
-*.iml
-module.conf.local.yaml
-vendor
-composer.lock
+vendor/
+components/
 composer.phar
+composer.lock
+tests/*
+.idea
+.php-cs-fixer.cache
+app/
+modules/

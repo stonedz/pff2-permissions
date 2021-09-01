@@ -1,8 +1,8 @@
 <?php
 
 namespace pff\modules;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Minime\Annotations\Cache\ApcCache;
+
+use Minime\Annotations\Cache\ArrayCache;
 use pff\Abs\AController;
 use pff\Abs\AModule;
 use pff\Core\ModuleManager;
@@ -15,15 +15,15 @@ use Minime\Annotations\Parser;
 /**
  * Manages Controller->action permissions
  */
-class PermissionChecker extends AModule implements IConfigurableModule, IBeforeHook{
-
-    private $userClass,
-        $sessionUserId,
-        $getPermission,
-        $controllerNotLogged,
-        $actionNotLogged,
-        $permissionClass,
-        $dbType;
+class PermissionChecker extends AModule implements IConfigurableModule, IBeforeHook
+{
+    private $userClass;
+    private $sessionUserId;
+    private $getPermission;
+    private $controllerNotLogged;
+    private $actionNotLogged;
+    private $permissionClass;
+    private $dbType;
 
     /**
      * @var \ReflectionClass
@@ -40,15 +40,17 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
      */
     private $reader;
 
-    public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml'){
+    public function __construct($confFile = 'pff2-permissions/module.conf.local.yaml')
+    {
         $this->loadConfig($confFile);
-        $this->reader = new Reader(new Parser(), new ApcCache());
+        $this->reader = new Reader(new Parser(), new ArrayCache());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function loadConfig($confFile) {
+    public function loadConfig($confFile)
+    {
         $conf = $this->readConfig($confFile);
 
         $this->userClass           = $conf['moduleConf']['userClass'];
@@ -67,69 +69,65 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
      * @throws \Doctrine\ORM\TransactionRequiredException
      * @throws PffException
      */
-    public function doBefore() {
-	$logical_operator = 'and';
+    public function doBefore()
+    {
+        $logical_operator = 'and';
+        /** @var Pff2Annotations $annotationReader*/
         $annotationReader = ModuleManager::loadModule('pff2-annotations');
 
-        $class_permissions  = $annotationReader->getClassAnnotation('Pff2Permissions');
-        $method_permissions = $annotationReader->getMethodAnnotation('Pff2Permissions');
-	$logical_operator_tmp = $annotationReader->getMethodAnnotation('Pff2PermissionsLogicalOperator');
-	
-	if($logical_operator_tmp == 'and' || $logical_operator_tmp == 'AND'){
-	    $logical_operator = 'and';
-	}
-	elseif($logical_operator_tmp == 'or' || $logical_operator_tmp == 'OR'){
-	    $logical_operator = 'or';
-	}
+        $class_permissions    = $annotationReader->getClassAnnotation('Pff2Permissions');
+        $method_permissions   = $annotationReader->getMethodAnnotation('Pff2Permissions');
+        $logical_operator_tmp = $annotationReader->getMethodAnnotation('Pff2PermissionsLogicalOperator');
+
+        if ($logical_operator_tmp == 'and' || $logical_operator_tmp == 'AND') {
+            $logical_operator = 'and';
+        } elseif ($logical_operator_tmp == 'or' || $logical_operator_tmp == 'OR') {
+            $logical_operator = 'or';
+        }
 
         //There's no permissions, let the user in
-        if((!$method_permissions && !$class_permissions)) {
+        if ((!$method_permissions && !$class_permissions)) {
             return true;
         }
 
-        if($method_permissions && !$class_permissions) {
+        if ($method_permissions && !$class_permissions) {
             $annotations = $method_permissions;
-        }
-        else if (!$method_permissions && $class_permissions) {
+        } elseif (!$method_permissions && $class_permissions) {
             $annotations = $class_permissions;
-        }
-        else {
+        } else {
             $annotations = array_merge($method_permissions, $class_permissions);
             $annotations = array_unique($annotations);
         }
 
-        if(isset($_SESSION['logged_data'][$this->sessionUserId])) {
-            if($this->dbType == 'odm') {
+        if (isset($_SESSION['logged_data'][$this->sessionUserId])) {
+            if ($this->dbType == 'odm') {
                 $user = $this->_controller->_dm->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
-            }else {
+            } else {
                 $user = $this->_controller->_em->find('\\pff\\models\\'.$this->userClass, $_SESSION['logged_data'][$this->sessionUserId]);
             }
-            $perm = call_user_func(array($user, $this->getPermission));
-            if(!$perm) {
+            $perm = call_user_func([$user, $this->getPermission]);
+            if (!$perm) {
                 throw new PffException('Action not permitted', 403);
             }
-        }
-        else {
+        } else {
             header("Location: ".$this->_app->getExternalPath().$this->controllerNotLogged."/".$this->actionNotLogged);
             exit();
         }
 
-	
-	if($logical_operator == 'and'){
-            foreach($annotations as $a) {
-                if(!call_user_func(array($perm, 'get'.$a))) {
+        if ($logical_operator == 'and') {
+            foreach ($annotations as $a) {
+                if (!call_user_func([$perm, 'get'.$a])) {
                     throw new PffException('Action not permitted', 403);
                 }
             }
-	}
-	elseif($logical_operator == 'or'){
-            foreach($annotations as $a) {
-                if(call_user_func(array($perm, 'get'.$a))) {
+        } elseif ($logical_operator == 'or') {
+            foreach ($annotations as $a) {
+                if (call_user_func([$perm, 'get'.$a])) {
                     return true;
                 }
             }
             throw new PffException('Action not permitted', 403);
-	}
+        }
         return true;
     }
 
@@ -139,16 +137,19 @@ class PermissionChecker extends AModule implements IConfigurableModule, IBeforeH
      *
      * @return array
      */
-    public function getPrettyPermissions() {
+    public function getPrettyPermissions()
+    {
         $permissionReflect = new \ReflectionClass('\\pff\models\\'.$this->permissionClass);
         $prop = $permissionReflect->getProperties();
-        $toReturnAnnotations = array();
-        foreach($prop as $a) {
+        $toReturnAnnotations = [];
+        foreach ($prop as $a) {
             $i = $this->reader->getPropertyAnnotations('\\pff\models\\'.$this->permissionClass, $a->name);
             $arr = $i->toArray();
-            if(isset($arr['Pff2PermissionDescription'])){
+            if (isset($arr['Pff2PermissionDescription'])) {
                 $tmp_name = explode('_', $a->name);
-                array_walk($tmp_name, function(&$arr,$k){$arr = ucfirst($arr);});
+                array_walk($tmp_name, function (&$arr, $k) {
+                    $arr = ucfirst($arr);
+                });
                 $toReturnAnnotations[implode($tmp_name)] = $arr['Pff2PermissionDescription'];
             }
         }
