@@ -3,9 +3,11 @@
 	"type": "pff2-module",
 	"description": "Manages permissions in pff2 controllers",
 	"license": "MIT",
-    "minimum-stability": "dev",
+	"minimum-stability": "dev",
 	"keywords": [
-		"pff2", "module", "permissions"
+		"pff2",
+		"module",
+		"permissions"
 	],
 	"authors": [
 		{
@@ -16,15 +18,26 @@
 	],
 	"homepage": "https://github.com/stonedz/pff2-permissions",
 	"require": {
-		"stonedz/pff2-installers": "*",
-        "stonedz/pff2-annotations": "3.0.x-dev"
+		"stonedz/pff2-installers": "*"
 	},
-    "require-dev": {
-        "stonedz/pff2": "3.0.x-dev"
-    },
-    "autoload": {
-        "psr-4": {
-            "pff\\modules\\": "src/"
-        }
-    }
+	"require-dev": {
+		"stonedz/pff2": "^4",
+		"phpunit/phpunit": "^10.5"
+	},
+	"autoload": {
+		"psr-4": {
+			"pff\\modules\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests/",
+			"pff\\models\\": "tests/Fixtures/Models/"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"stonedz/pff2-installers": true
+		}
+	}
 }
