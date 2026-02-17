@@ -1,11 +1,11 @@
 moduleConf:
-  # USer class name
+  # User class name
   userClass: AnagraficaBusiness
 
   # Session key to get Id of the currently logged user
   sessionUserId: id_user
 
-  # Method on the user instance to get the Permission instace (POPO)
+  # Method on the user instance to get the Permission instance (POPO)
   getPermission: getPermesso
 
   # Controller to redirect if not logged
@@ -14,8 +14,5 @@ moduleConf:
   # Action to redirect if not logged
   actionNotLogged: index
 
-  # NAme of the class used as Permission
+  # Name of the class used as Permission
   permissionClass: Permesso
-
-  # Choose db type possible values are (odm for doctrine odb and orm for doctrine orm)
-  dbType: orm
